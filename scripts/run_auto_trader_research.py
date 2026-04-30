@@ -49,6 +49,7 @@ def build_config(
     max_recur_limit: int,
     output_language: str,
     checkpoint_enabled: bool,
+    openai_use_responses_api: bool,
 ) -> dict[str, Any]:
     """Build a minimal TradingAgents config suitable for shim smoke/advisory runs."""
     config = DEFAULT_CONFIG.copy()
@@ -63,6 +64,7 @@ def build_config(
             "max_recur_limit": max_recur_limit,
             "output_language": output_language,
             "checkpoint_enabled": checkpoint_enabled,
+            "openai_use_responses_api": openai_use_responses_api,
         }
     )
     return config
@@ -91,6 +93,7 @@ def run_analysis(
     max_recur_limit: int,
     output_language: str,
     checkpoint_enabled: bool,
+    openai_use_responses_api: bool,
     debug: bool = False,
 ) -> dict[str, Any]:
     """Run TradingAgents and return an advisory-only JSON-serializable payload."""
@@ -105,6 +108,7 @@ def run_analysis(
         max_recur_limit=max_recur_limit,
         output_language=output_language,
         checkpoint_enabled=checkpoint_enabled,
+        openai_use_responses_api=openai_use_responses_api,
     )
 
     captured_stdout = io.StringIO()
@@ -141,6 +145,7 @@ def run_analysis(
             "max_recur_limit": max_recur_limit,
             "output_language": output_language,
             "checkpoint_enabled": checkpoint_enabled,
+            "openai_use_responses_api": openai_use_responses_api,
         },
         "warnings": {
             "structured_output": extract_structured_output_warnings(captured_log),
@@ -191,6 +196,22 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Enable TradingAgents checkpointing. Disabled by default for repeatable smoke runs.",
     )
+    parser.add_argument(
+        "--openai-use-responses-api",
+        dest="openai_use_responses_api",
+        action="store_true",
+        default=False,
+        help=(
+            "Use OpenAI Responses API for provider=openai. Disabled by default "
+            "so local OpenAI-compatible proxies such as openai-oauth use chat completions."
+        ),
+    )
+    parser.add_argument(
+        "--no-openai-use-responses-api",
+        dest="openai_use_responses_api",
+        action="store_false",
+        help="Force OpenAI-compatible chat completions for provider=openai.",
+    )
     parser.add_argument("--debug", action="store_true")
     parser.add_argument(
         "--output",
@@ -217,6 +238,7 @@ def main(argv: list[str] | None = None) -> int:
         max_recur_limit=args.max_recur_limit,
         output_language=args.output_language,
         checkpoint_enabled=args.checkpoint_enabled,
+        openai_use_responses_api=args.openai_use_responses_api,
         debug=args.debug,
     )
 

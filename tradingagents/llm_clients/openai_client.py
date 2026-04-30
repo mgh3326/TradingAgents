@@ -38,6 +38,7 @@ class NormalizedChatOpenAI(ChatOpenAI):
 _PASSTHROUGH_KWARGS = (
     "timeout", "max_retries", "reasoning_effort",
     "api_key", "callbacks", "http_client", "http_async_client",
+    "use_responses_api",
 )
 
 # Provider base URLs and API key env vars
@@ -93,9 +94,10 @@ class OpenAIClient(BaseLLMClient):
             if key in self.kwargs:
                 llm_kwargs[key] = self.kwargs[key]
 
-        # Native OpenAI: use Responses API for consistent behavior across
-        # all model families. Third-party providers use Chat Completions.
-        if self.provider == "openai":
+        # Native OpenAI: use Responses API by default for the real OpenAI
+        # endpoint, but allow local OpenAI-compatible proxies (openai-oauth,
+        # shim endpoints, etc.) to force Chat Completions.
+        if self.provider == "openai" and "use_responses_api" not in llm_kwargs:
             llm_kwargs["use_responses_api"] = True
 
         return NormalizedChatOpenAI(**llm_kwargs)

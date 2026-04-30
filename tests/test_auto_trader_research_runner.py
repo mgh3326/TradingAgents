@@ -33,6 +33,7 @@ def test_build_config_uses_openai_compatible_shim_defaults():
         max_recur_limit=30,
         output_language="English",
         checkpoint_enabled=False,
+        openai_use_responses_api=False,
     )
 
     assert config["llm_provider"] == "openai"
@@ -44,6 +45,7 @@ def test_build_config_uses_openai_compatible_shim_defaults():
     assert config["max_recur_limit"] == 30
     assert config["output_language"] == "English"
     assert config["checkpoint_enabled"] is False
+    assert config["openai_use_responses_api"] is False
 
 
 @pytest.mark.unit
@@ -74,6 +76,7 @@ def test_run_analysis_returns_advisory_only_payload_and_structured_warnings(monk
         max_recur_limit=30,
         output_language="English",
         checkpoint_enabled=False,
+        openai_use_responses_api=False,
     )
 
     assert result["status"] == "ok"
@@ -96,6 +99,7 @@ def test_main_writes_json_output_file(monkeypatch, tmp_path):
     output_path = tmp_path / "research.json"
 
     def fake_run_analysis(**kwargs):
+        assert kwargs["openai_use_responses_api"] is False
         return {
             "status": "ok",
             "symbol": kwargs["symbol"],

@@ -143,6 +143,8 @@ class TradingAgentsGraph:
             reasoning_effort = self.config.get("openai_reasoning_effort")
             if reasoning_effort:
                 kwargs["reasoning_effort"] = reasoning_effort
+            if "openai_use_responses_api" in self.config:
+                kwargs["use_responses_api"] = self.config["openai_use_responses_api"]
 
         elif provider == "anthropic":
             effort = self.config.get("anthropic_effort")
